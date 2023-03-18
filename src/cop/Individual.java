@@ -1,2 +1,5 @@
-package cop;public class Individual {
+package cop;
+
+public abstract class Individual {
+    private Genome genome;
 }
