@@ -1,8 +1,8 @@
-package cop;
+package cop.fitness;
 
-import java.lang.reflect.Array;
+import cop.genome.Genome;
 
-public class COPFitnessCalculator {
+public class COPFitnessCalculator implements FitnessCalculator<Byte[]> {
 
     public static final int ONES = 1;
     public static final int ZEROS = 0;
@@ -17,12 +17,7 @@ public class COPFitnessCalculator {
         this.bitToCount = bitToCount;
     }
 
-    public static void main(String[] args) {
-        COPFitnessCalculator fitnessCalculator = new COPFitnessCalculator();
-        Genome<Byte[]> genome = new COPGenome(new Byte[]{});
-        System.out.println(fitnessCalculator.calculateFitnessOf(genome));
-    }
-
+    @Override
     public int calculateFitnessOf(Genome<Byte[]> genome) {
         Byte[] genes = genome.getGenome();
 
