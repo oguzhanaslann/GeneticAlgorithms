@@ -6,6 +6,7 @@ import cop.genome.Genome;
 import cop.mating.MatingStrategy;
 import cop.mutation.MutationStrategy;
 import cop.survival.SurvivalSelectionStrategy;
+import cop.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,9 @@ public abstract class Experiment<T> {
     private final SurvivalSelectionStrategy<T> survivalSelectionStrategy;
     private final FitnessCalculator<T> fitnessCalculator;
     private final ArrayList<Genome<T>> population = new ArrayList<>();
+    private String name;
     private Genome<T> bestGenome;
+
 
     public Experiment(
             int geneSizeOfIndividuals,
@@ -50,7 +53,8 @@ public abstract class Experiment<T> {
 
 
     public final void run() {
-        ArrayList<Genome<T>> initPopulation = getInitPopulation(populationSize);
+
+        List<Genome<T>> initPopulation = getInitPopulation(populationSize);
         if (initPopulation.size() != populationSize) {
             throw new IllegalArgumentException("The size of the initial population must be equal to the population size");
         }
@@ -59,10 +63,32 @@ public abstract class Experiment<T> {
         evaluateEachIndividualFitness();
         bestGenome = population.get(0);
         calculateAndUpdateBestGenome();
+
+        for (int i = 0; i < numberOfGenerations; i++) {
+            ArrayList<Genome<T>> offSprings = new ArrayList<>();
+
+            for (int j = 0; j < (populationSize / 2); j++) {
+                Pair<Genome<T>, Genome<T>> parentPair = matingStrategy.getMateFrom(population);
+                Genome<T> parent1 = parentPair.first;
+                Genome<T> parent2 = parentPair.second;
+
+                List<Genome<T>> children = crossoverStrategy.crossoverByRate(parent1, parent2, crossOverRate);
+                mutationStrategy.mutateByRate(children, mutationRate);
+
+                offSprings.addAll(children);
+                calculateAndUpdateBestGenomeBy(children);
+            }
+
+            population.addAll(offSprings);
+
+            List<Genome<T>> survivors = survivalSelectionStrategy.selectSurvivors(population);
+            population.clear();
+            population.addAll(survivors);
+        }
     }
 
 
-    protected abstract ArrayList<Genome<T>> getInitPopulation(int populationSize);
+    protected abstract List<Genome<T>> getInitPopulation(int populationSize);
 
     private void evaluateEachIndividualFitness() {
         for (Genome<T> genome : population) {
@@ -77,21 +103,33 @@ public abstract class Experiment<T> {
             return;
         }
 
-        double bestFitness = bestGenome.getFitness();
-        for (Genome<T> genome : getPopulation()) {
-            double fitness = genome.getFitness();
-            if (fitness < bestFitness) {
-                bestFitness = fitness;
+        for (Genome<T> genome : population) {
+            boolean isBetterGenome = genome.compareTo(bestGenome) > 0;
+            if (isBetterGenome) {
                 bestGenome = genome;
             }
         }
-
-        this.bestGenome = bestGenome;
     }
 
+    private void calculateAndUpdateBestGenomeBy(List<Genome<T>> genomes) {
+        for (Genome<T> genome : genomes) {
+            boolean isBetterGenome = genome.compareTo(bestGenome) > 0;
+            if (isBetterGenome) {
+                bestGenome = genome;
+            }
+        }
+    }
 
     public Genome<T> getBestGenome() {
         return bestGenome;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     protected int getGeneSizeOfIndividuals() {
@@ -136,5 +174,9 @@ public abstract class Experiment<T> {
 
     protected List<Genome<T>> getPopulation() {
         return population;
+    }
+
+    public int getCurrentPopulationSize() {
+        return population.size();
     }
 }

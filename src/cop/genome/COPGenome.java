@@ -2,62 +2,34 @@ package cop.genome;
 
 import cop.fitness.COPFitnessCalculator;
 import cop.fitness.FitnessCalculator;
+import cop.selection.ElitismSelection;
+import cop.selection.RouletteWheelSelection;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-public class COPGenome implements Genome<Byte[]> {
+public class COPGenome implements Genome<List<Byte>> {
 
-    private final Byte[] genome;
+    private final List<Byte> genome;
 
     private double fitness;
 
-    public COPGenome(Byte[] genome) {
-        this.genome = genome;
-    }
-
     public COPGenome(int genomeSize) {
-        this.genome = new Byte[genomeSize];
+        this.genome = new ArrayList<>(genomeSize);
+        for (int i = 0; i < genomeSize; i++) {
+            genome.add((byte) 0);
+        }
         randomlyFillGenomeWithBits();
     }
 
-    public COPGenome(int genomeSize, FitnessCalculator<Byte[]> calculator) {
-        this.genome = new Byte[genomeSize];
-        randomlyFillGenomeWithBits();
-        calculateAndSetFitnessBy(calculator);
-    }
-
-    public COPGenome(Byte[] genome, FitnessCalculator<Byte[]> calculator) {
+    public COPGenome(List<Byte> genome) {
         this.genome = genome;
-        calculateAndSetFitnessBy(calculator);
-    }
-
-    public static void main(String[] args) {
-        COPFitnessCalculator calculator = new COPFitnessCalculator();
-        ArrayList<Genome<Byte[]>> genomes = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            COPGenome genome = new COPGenome(10);
-            genome.calculateFitness(calculator);
-            System.out.println(genome);
-            genomes.add(genome);
-        }
-
-        // sort genomes by fitness
-        Collections.sort(genomes);
-        System.out.println("Sorted genomes:");
-        for (Genome<Byte[]> genome : genomes) {
-            System.out.println(genome);
-        }
-    }
-
-    private void calculateAndSetFitnessBy(FitnessCalculator<Byte[]> calculator) {
-        int calculatedFitness = calculator.calculateFitnessOf(this);
-        setFitness(calculatedFitness);
     }
 
     private void randomlyFillGenomeWithBits() {
-        for (int i = 0; i < genome.length; i++) {
-            genome[i] = getRandomBit();
+        for (int i = 0; i < genome.size(); i++) {
+            genome.set(i, getRandomBit());
         }
     }
 
@@ -66,7 +38,7 @@ public class COPGenome implements Genome<Byte[]> {
     }
 
     @Override
-    public Byte[] getGenome() {
+    public List<Byte> getGenome() {
         return genome;
     }
 
@@ -80,12 +52,17 @@ public class COPGenome implements Genome<Byte[]> {
     }
 
     @Override
-    public void calculateFitness(FitnessCalculator<Byte[]> calculator) {
+    public void calculateFitness(FitnessCalculator<List<Byte>> calculator) {
         calculateAndSetFitnessBy(calculator);
     }
 
+    private void calculateAndSetFitnessBy(FitnessCalculator<List<Byte>> calculator) {
+        int calculatedFitness = calculator.calculateFitnessOf(this);
+        setFitness(calculatedFitness);
+    }
+
     @Override
-    public int compareTo(Genome<Byte[]> o) {
+    public int compareTo(Genome<List<Byte>> o) {
         return Double.compare(this.getFitness(), o.getFitness());
     }
 

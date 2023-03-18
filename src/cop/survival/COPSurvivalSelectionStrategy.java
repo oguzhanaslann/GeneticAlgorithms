@@ -7,26 +7,37 @@ import cop.selection.Selection;
 import java.util.ArrayList;
 import java.util.List;
 
-public class COPSurvivalSelectionStrategy implements SurvivalSelectionStrategy<Byte[]> {
+public class COPSurvivalSelectionStrategy implements SurvivalSelectionStrategy<List<Byte>> {
 
-    private final ElitismSelection<Byte[]> elitismSelection;
+    private final ElitismSelection<List<Byte>> elitismSelection;
 
-    private final Selection<Byte[]> nonElitismSelection;
+    private final Selection<List<Byte>> nonElitismSelection;
 
-    public COPSurvivalSelectionStrategy(int elitismSelectionSize, Selection<Byte[]> nonElitismSelection) {
-        elitismSelection = new ElitismSelection<>(elitismSelectionSize);
+    private final int totalSelectionCount;
+
+    private final int elitismCount;
+
+
+    public COPSurvivalSelectionStrategy(
+            int totalSelectionCount,
+            int elitismCount,
+            Selection<List<Byte>> nonElitismSelection
+    ) {
         this.nonElitismSelection = nonElitismSelection;
+        this.totalSelectionCount = totalSelectionCount;
+        this.elitismCount = elitismCount;
+        elitismSelection = new ElitismSelection<>();
     }
 
 
     @Override
-    public List<Genome<Byte[]>> selectSurvivors(List<Genome<Byte[]>> population) {
+    public List<Genome<List<Byte>>> selectSurvivors(List<Genome<List<Byte>>> population) {
 
-        ArrayList<Genome<Byte[]>> copyPopulation = new ArrayList<>(population);
+        ArrayList<Genome<List<Byte>>> copyPopulation = new ArrayList<>(population);
 
-        ArrayList<Genome<Byte[]>> newPopulation = new ArrayList<>();
+        ArrayList<Genome<List<Byte>>> newPopulation = new ArrayList<>();
 
-        List<Genome<Byte[]>> elites = selectWithElitism(copyPopulation);
+        List<Genome<List<Byte>>> elites = selectWithElitism(copyPopulation);
         newPopulation.addAll(elites);
 
         // remove the elites from the population to avoid duplicates
@@ -38,11 +49,11 @@ public class COPSurvivalSelectionStrategy implements SurvivalSelectionStrategy<B
         return newPopulation;
     }
 
-    private List<Genome<Byte[]>> selectWithElitism(List<Genome<Byte[]>> population) {
-        return elitismSelection.selectFrom(population);
+    private List<Genome<List<Byte>>> selectWithElitism(List<Genome<List<Byte>>> population) {
+        return elitismSelection.selectFrom(population,elitismCount);
     }
 
-    private List<Genome<Byte[]>> selectWithoutElitism(List<Genome<Byte[]>> population) {
-        return nonElitismSelection.selectFrom(population);
+    private List<Genome<List<Byte>>> selectWithoutElitism(List<Genome<List<Byte>>> population) {
+        return nonElitismSelection.selectFrom(population,(totalSelectionCount - elitismCount));
     }
 }

@@ -2,7 +2,9 @@ package cop.fitness;
 
 import cop.genome.Genome;
 
-public class COPFitnessCalculator implements FitnessCalculator<Byte[]> {
+import java.util.List;
+
+public class COPFitnessCalculator implements FitnessCalculator<List<Byte>> {
 
     public static final int ONES = 1;
     public static final int ZEROS = 0;
@@ -18,8 +20,8 @@ public class COPFitnessCalculator implements FitnessCalculator<Byte[]> {
     }
 
     @Override
-    public int calculateFitnessOf(Genome<Byte[]> genome) {
-        Byte[] genes = genome.getGenome();
+    public int calculateFitnessOf(Genome<List<Byte>> genome) {
+        List<Byte> genes = genome.getGenome();
 
         int largestAmounthOfConsecutiveOnes = 0;
         int currentConsecutiveOnes = 0;
