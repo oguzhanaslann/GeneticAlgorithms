@@ -58,7 +58,7 @@ public abstract class Experiment<T> {
         if (initPopulation.size() != populationSize) {
             throw new IllegalArgumentException("The size of the initial population must be equal to the population size");
         }
-
+        population.clear();
         population.addAll(initPopulation);
         evaluateEachIndividualFitness();
         bestGenome = population.get(0);

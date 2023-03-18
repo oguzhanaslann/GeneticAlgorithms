@@ -35,12 +35,11 @@ public class Playground {
                 bestGenomes.add(experiment.getBestGenome());
             }
 
-            System.out.println("Average fitness: " + (totalFitness / 10));
+            System.out.println("Average fitness: " + (totalFitness / 10d));
             System.out.println("Best genomes: ");
             for (Genome<List<Byte>> bestGenome : bestGenomes) {
                 System.out.println(bestGenome);
             }
-
             System.out.println("----------------------------------------------------");
             System.out.println();
         }
